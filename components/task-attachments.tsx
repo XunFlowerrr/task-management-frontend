@@ -1,12 +1,10 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Attachment,
   getTaskAttachments,
-  uploadAttachment,
   deleteAttachment,
-  getAttachmentDownloadUrl,
   getAttachmentPreviewUrl,
   getAttachmentSignedDownloadUrl,
   getSignedUploadUrl,
@@ -80,7 +78,8 @@ export function TaskAttachments({ taskId, token }: TaskAttachmentsProps) {
     null
   );
 
-  const fetchAttachments = async () => {
+  // Wrap fetchAttachments in useCallback
+  const fetchAttachments = useCallback(async () => {
     if (!token) return;
     setIsLoading(true);
     setError(null);
@@ -100,11 +99,11 @@ export function TaskAttachments({ taskId, token }: TaskAttachmentsProps) {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [taskId, token]);
 
   useEffect(() => {
     fetchAttachments();
-  }, [taskId, token]);
+  }, [fetchAttachments]);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {

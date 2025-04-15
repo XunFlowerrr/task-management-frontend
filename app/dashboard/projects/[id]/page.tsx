@@ -7,7 +7,7 @@ import { ReduxSidebarProvider } from "@/components/ui/redux-sidebar";
 import { BreadcrumbHelper } from "@/components/ui/breadcrumb-helper";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter, useParams } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getProject, Project } from "@/lib/api/projects";
 import { getAllTasks, Task, deleteTask } from "@/lib/api/tasks";
 import { getProjectMembers, ProjectMember } from "@/lib/api/projectMembers";
@@ -27,7 +27,6 @@ import {
   Edit,
   Trash2,
   Eye,
-  Info, // Added Info icon
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
@@ -78,49 +77,44 @@ export default function ProjectDashboard() {
     }
   }, [isAuthenticated, router]);
 
-  useEffect(() => {
-    if (isAuthenticated && user?.token) {
-      const fetchProjectData = async () => {
-        try {
-          setLoading(true);
-          setError(null);
+  const fetchProjectData = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
 
-          const [projectData, tasksData, membersData] = await Promise.all([
-            getProject(projectId, user.token),
-            getAllTasks(projectId, user.token),
-            getProjectMembers(projectId, user.token),
-          ]);
+      const [projectData, tasksData, membersData] = await Promise.all([
+        getProject(projectId, user.token),
+        getAllTasks(projectId, user.token),
+        getProjectMembers(projectId, user.token),
+      ]);
 
-          console.log("Project Data Dash:", projectData);
-          setProject(projectData);
-          setTasks(tasksData);
-          setTeamMembers(membersData);
+      console.log("Project Data Dash:", projectData);
+      setProject(projectData);
+      setTasks(tasksData);
+      setTeamMembers(membersData);
 
-          setLoading(false);
-        } catch (error) {
-          console.error("Failed to fetch project data:", error);
-          let errorMessage =
-            "An unexpected error occurred. Please try again later.";
-          if (error instanceof Error) {
-            errorMessage = error.message;
-            if (
-              error.name === "SyntaxError" &&
-              error.message.includes("JSON")
-            ) {
-              errorMessage = `Received invalid data from the server. ${error.message}`;
-              console.error("Response body likely not JSON.");
-            } else {
-              errorMessage = `Failed to load project data: ${error.message}`;
-            }
-          }
-          setError(errorMessage);
-          setLoading(false);
+      setLoading(false);
+    } catch (error) {
+      console.error("Failed to fetch project data:", error);
+      let errorMessage =
+        "An unexpected error occurred. Please try again later.";
+      if (error instanceof Error) {
+        errorMessage = error.message;
+        if (error.name === "SyntaxError" && error.message.includes("JSON")) {
+          errorMessage = `Received invalid data from the server. ${error.message}`;
+          console.error("Response body likely not JSON.");
+        } else {
+          errorMessage = `Failed to load project data: ${error.message}`;
         }
-      };
-
-      fetchProjectData();
+      }
+      setError(errorMessage);
+      setLoading(false);
     }
-  }, []);
+  }, [projectId, user.token]);
+
+  useEffect(() => {
+    fetchProjectData();
+  }, [fetchProjectData]);
 
   // Listen for real-time project updates
   useSocket("projectUpdated", (data: { projectId: string }) => {
@@ -228,7 +222,6 @@ export default function ProjectDashboard() {
   const inProgressTasks = tasks.filter(
     (task) => task.status === "in-progress"
   ).length;
-  const pendingTasks = tasks.filter((task) => task.status === "pending").length;
   const dueSoonTasks = tasks.filter((task) => {
     if (!task.due_date) return false;
     const dueDate = new Date(task.due_date);
@@ -247,7 +240,7 @@ export default function ProjectDashboard() {
         return "Unknown";
       }
       return date.toLocaleDateString();
-    } catch (e) {
+    } catch {
       return "Unknown";
     }
   };

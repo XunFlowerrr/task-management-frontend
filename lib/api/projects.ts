@@ -54,7 +54,7 @@ export async function createProject(data: CreateProjectData, token?: string): Pr
     let errorData;
     try {
       errorData = JSON.parse(errorText); // Try parsing the text
-    } catch (jsonError) {
+    } catch {
       // If parsing fails, use the raw text
       throw new Error(
         `Failed to create project: ${response.status} ${response.statusText}. Server responded with: ${errorText}`
@@ -66,9 +66,9 @@ export async function createProject(data: CreateProjectData, token?: string): Pr
 
   try {
     return await response.json();
-  } catch (jsonError) {
+  } catch {
     // If server sends 201 Created but invalid JSON
-    console.error("Failed to parse successful response JSON (createProject):", jsonError);
+    console.error("Failed to parse successful response JSON (createProject):");
     throw new Error(`Received OK status (${response.status}) but failed to parse JSON response.`);
   }
 }
@@ -96,9 +96,9 @@ export async function getAllProjectsClient(token: string): Promise<Project[]> {
       errorData = JSON.parse(errorText); // Try parsing the text
       // If parsing succeeds, use the parsed error message if available
       throw new Error(errorData?.error || `Failed to fetch projects (client): ${response.status} ${response.statusText}`);
-    } catch (jsonError) {
+    } catch {
       // If parsing fails, it means the error response wasn't JSON (e.g., HTML 404 page)
-      console.error("Failed to parse error response JSON (getAllProjectsClient):", jsonError);
+      console.error("Failed to parse error response JSON (getAllProjectsClient):");
       throw new Error(
         `Failed to fetch projects (client): ${response.status} ${response.statusText}. Server returned a non-JSON response: ${errorText.substring(0, 100)}...` // Include a snippet of the unexpected response
       );
@@ -107,9 +107,9 @@ export async function getAllProjectsClient(token: string): Promise<Project[]> {
 
   try {
     return await response.json();
-  } catch (jsonError) {
+  } catch {
     // If server sends 200 OK but invalid JSON
-    console.error("Failed to parse successful response JSON (getAllProjectsClient):", jsonError);
+    console.error("Failed to parse successful response JSON (getAllProjectsClient):");
     throw new Error(`Received OK status (${response.status}) but failed to parse JSON response.`);
   }
 }
@@ -139,7 +139,7 @@ export async function getAllProjects(token?: string): Promise<Project[]> {
     let errorData;
     try {
       errorData = JSON.parse(errorText); // Try parsing the text
-    } catch (jsonError) {
+    } catch {
       // If parsing fails, use the raw text
       throw new Error(
         `Failed to fetch projects: ${response.status} ${response.statusText}. Server responded with: ${errorText}`
@@ -151,9 +151,9 @@ export async function getAllProjects(token?: string): Promise<Project[]> {
 
   try {
     return await response.json();
-  } catch (jsonError) {
+  } catch {
     // If server sends 200 OK but invalid JSON
-    console.error("Failed to parse successful response JSON (getAllProjects):", jsonError);
+    console.error("Failed to parse successful response JSON (getAllProjects):");
     throw new Error(`Received OK status (${response.status}) but failed to parse JSON response.`);
   }
 }
@@ -183,7 +183,7 @@ export async function getProject(id: string, token?: string): Promise<Project> {
     let errorData;
     try {
       errorData = JSON.parse(errorText); // Try parsing the text
-    } catch (jsonError) {
+    } catch {
       // If parsing fails, use the raw text
       throw new Error(
         `Failed to fetch project: ${response.status} ${response.statusText}. Server responded with: ${errorText}`
@@ -195,9 +195,9 @@ export async function getProject(id: string, token?: string): Promise<Project> {
 
   try {
     return await response.json();
-  } catch (jsonError) {
+  } catch {
     // If server sends 200 OK but invalid JSON
-    console.error("Failed to parse successful response JSON (getProject):", jsonError);
+    console.error("Failed to parse successful response JSON (getProject):");
     throw new Error(`Received OK status (${response.status}) but failed to parse JSON response.`);
   }
 }
@@ -228,7 +228,7 @@ export async function updateProject(id: string, data: UpdateProjectData, token?:
     let errorData;
     try {
       errorData = JSON.parse(errorText); // Try parsing the text
-    } catch (jsonError) {
+    } catch {
       // If parsing fails, use the raw text
       throw new Error(
         `Failed to update project: ${response.status} ${response.statusText}. Server responded with: ${errorText}`
@@ -240,9 +240,9 @@ export async function updateProject(id: string, data: UpdateProjectData, token?:
 
   try {
     return await response.json();
-  } catch (jsonError) {
+  } catch {
     // If server sends 200 OK but invalid JSON
-    console.error("Failed to parse successful response JSON (updateProject):", jsonError);
+    console.error("Failed to parse successful response JSON (updateProject):");
     throw new Error(`Received OK status (${response.status}) but failed to parse JSON response.`);
   }
 }
@@ -272,7 +272,7 @@ export async function deleteProject(id: string, token?: string): Promise<{ messa
     let errorData;
     try {
       errorData = JSON.parse(errorText); // Try parsing the text
-    } catch (jsonError) {
+    } catch {
       // If parsing fails, use the raw text
       throw new Error(
         `Failed to delete project: ${response.status} ${response.statusText}. Server responded with: ${errorText}`
@@ -290,9 +290,9 @@ export async function deleteProject(id: string, token?: string): Promise<{ messa
 
   try {
     return await response.json();
-  } catch (jsonError) {
+  } catch {
     // If server sends 200 OK but invalid JSON
-    console.error("Failed to parse successful response JSON (deleteProject):", jsonError);
+    console.error("Failed to parse successful response JSON (deleteProject):");
     throw new Error(`Received OK status (${response.status}) but failed to parse JSON response.`);
   }
 }

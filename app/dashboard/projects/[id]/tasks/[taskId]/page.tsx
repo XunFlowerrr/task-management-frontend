@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import {
@@ -13,7 +13,6 @@ import {
 import { getProject, Project } from "@/lib/api/projects";
 import {
   getTaskAttachments,
-  uploadAttachment,
   deleteAttachment,
   Attachment,
   getAttachmentDownloadUrl,
@@ -37,7 +36,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Tooltip,
   TooltipContent,
@@ -89,9 +88,6 @@ import { AttachmentPreviewModal } from "@/components/ui/AttachmentPreviewModal";
 import { EditTaskDialog } from "@/components/edit-task-dialog";
 import { useSocket } from "@/hooks/useSocket";
 
-const API_URL =
-  process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
-
 export default function TaskDetailPage() {
   const { isAuthenticated, user } = useAuth();
   const router = useRouter();
@@ -109,6 +105,7 @@ export default function TaskDetailPage() {
   const [isUploading, setIsUploading] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [previewUrls, setPreviewUrls] = useState<Record<string, string>>({});
+  const previousPreviewUrlsRef = useRef<Record<string, string>>({});
   const [isPreviewModalOpen, setIsPreviewModalOpen] = useState(false);
   const [previewFileUrl, setPreviewFileUrl] = useState<string | null>(null);
   const [previewFileName, setPreviewFileName] = useState<string | null>(null);
@@ -161,6 +158,18 @@ export default function TaskDetailPage() {
     }
   };
 
+  // Function to specifically refresh attachments without global loading
+  const refreshAttachments = useCallback(async () => {
+    if (!user?.token || !taskId) return;
+    try {
+      const attachmentsData = await getTaskAttachments(taskId, user.token);
+      setAttachments(attachmentsData);
+    } catch (err) {
+      console.error("Failed to refresh attachments:", err);
+      toast.error("Failed to refresh attachments.");
+    }
+  }, [taskId, user?.token]);
+
   useEffect(() => {
     const currentPreviewUrls: Record<string, string> = {};
 
@@ -194,23 +203,40 @@ export default function TaskDetailPage() {
         }
       }
       setPreviewUrls(currentPreviewUrls);
+      previousPreviewUrlsRef.current = currentPreviewUrls;
     };
 
     generatePreviews();
 
     return () => {
-      Object.values(currentPreviewUrls).forEach(URL.revokeObjectURL);
-      Object.values(previewUrls).forEach(URL.revokeObjectURL);
+      const urlsToRevoke = previousPreviewUrlsRef.current;
+      Object.values(urlsToRevoke).forEach(URL.revokeObjectURL);
     };
   }, [attachments, user?.token]);
 
   // Listen for real-time attachment CRUD events
-  useSocket("attachmentCreated", (data: { taskId: string }) => {
-    if (data.taskId === taskId) fetchTaskData();
-  });
-  useSocket("attachmentDeleted", (data: { taskId: string }) => {
-    if (data.taskId === taskId) fetchTaskData();
-  });
+  useSocket(
+    "attachmentCreated",
+    useCallback(
+      (data: { taskId: string }) => {
+        if (data.taskId === taskId) {
+          refreshAttachments();
+        }
+      },
+      [taskId, refreshAttachments]
+    )
+  );
+  useSocket(
+    "attachmentDeleted",
+    useCallback(
+      (data: { taskId: string }) => {
+        if (data.taskId === taskId) {
+          refreshAttachments();
+        }
+      },
+      [taskId, refreshAttachments]
+    )
+  );
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {
@@ -224,17 +250,14 @@ export default function TaskDetailPage() {
     if (!selectedFile || !user?.token || !taskId) return;
     setIsUploading(true);
     try {
-      // 1. Get signed upload URL from backend
       const { url, gcsFileName } = await getSignedUploadUrl(
         taskId,
         selectedFile.name,
         selectedFile.type,
         user.token
       );
-      // 2. Upload file directly to GCS
       const uploadRes = await uploadFileToGcs(url, selectedFile);
       if (!uploadRes.ok) throw new Error("Failed to upload file to storage.");
-      // 3. Notify backend to create attachment record
       const result = await createAttachmentRecord(
         {
           taskId,
@@ -245,7 +268,6 @@ export default function TaskDetailPage() {
         },
         user.token
       );
-      // 4. Refresh attachments
       const attachmentsData = await getTaskAttachments(taskId, user.token);
       setAttachments(attachmentsData);
       setSelectedFile(null);
@@ -282,6 +304,7 @@ export default function TaskDetailPage() {
       toast.error(
         err instanceof Error ? err.message : "Failed to delete attachment."
       );
+      refreshAttachments();
     }
   };
 

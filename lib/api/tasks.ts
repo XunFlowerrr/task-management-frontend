@@ -73,7 +73,7 @@ export async function createTask(data: CreateTaskData, token?: string): Promise<
     let errorData;
     try {
       errorData = JSON.parse(errorText);
-    } catch (jsonError) {
+    } catch {
       throw new Error(
         `Failed to create task: ${response.status} ${response.statusText}. Server responded with: ${errorText}`
       );
@@ -83,8 +83,8 @@ export async function createTask(data: CreateTaskData, token?: string): Promise<
 
   try {
     return await response.json();
-  } catch (jsonError) {
-    console.error("Failed to parse successful response JSON (createTask):", jsonError);
+  } catch {
+    console.error("Failed to parse successful response JSON (createTask):");
     throw new Error(`Received OK status (${response.status}) but failed to parse JSON response.`);
   }
 }
@@ -120,7 +120,7 @@ export async function getAllTasks(projectId: string, token?: string, limit = 20,
     let errorData;
     try {
       errorData = JSON.parse(errorText);
-    } catch (jsonError) {
+    } catch {
       throw new Error(
         `Failed to fetch tasks: ${response.status} ${response.statusText}. Server responded with: ${errorText}`
       );
@@ -130,8 +130,8 @@ export async function getAllTasks(projectId: string, token?: string, limit = 20,
 
   try {
     return await response.json();
-  } catch (jsonError) {
-    console.error("Failed to parse successful response JSON (getAllTasks):", jsonError);
+  } catch {
+    console.error("Failed to parse successful response JSON (getAllTasks):");
     throw new Error(`Received OK status (${response.status}) but failed to parse JSON response.`);
   }
 }
@@ -161,7 +161,7 @@ export async function getTask(id: string, token?: string): Promise<Task> {
     let errorData;
     try {
       errorData = JSON.parse(errorText);
-    } catch (jsonError) {
+    } catch {
       throw new Error(
         `Failed to fetch task: ${response.status} ${response.statusText}. Server responded with: ${errorText}`
       );
@@ -171,8 +171,8 @@ export async function getTask(id: string, token?: string): Promise<Task> {
 
   try {
     return await response.json();
-  } catch (jsonError) {
-    console.error("Failed to parse successful response JSON (getTask):", jsonError);
+  } catch {
+    console.error("Failed to parse successful response JSON (getTask):");
     throw new Error(`Received OK status (${response.status}) but failed to parse JSON response.`);
   }
 }
@@ -211,7 +211,7 @@ export async function updateTask(
     let errorData;
     try {
       errorData = JSON.parse(errorText);
-    } catch (jsonError) {
+    } catch {
       throw new Error(
         `Failed to update task: ${response.status} ${response.statusText}. Server responded with: ${errorText}`
       );
@@ -221,8 +221,8 @@ export async function updateTask(
 
   try {
     return await response.json();
-  } catch (jsonError) {
-    console.error("Failed to parse successful response JSON (updateTask):", jsonError);
+  } catch {
+    console.error("Failed to parse successful response JSON (updateTask):");
     throw new Error(`Received OK status (${response.status}) but failed to parse JSON response.`);
   }
 }
@@ -253,7 +253,7 @@ export const deleteTask = async (
     let errorData;
     try {
       errorData = JSON.parse(errorText);
-    } catch (jsonError) {
+    } catch {
       throw new Error(
         `Failed to delete task: ${response.status} ${response.statusText}. Server responded with: ${errorText}`
       );
@@ -267,8 +267,8 @@ export const deleteTask = async (
 
   try {
     await response.json();
-  } catch (jsonError) {
-    console.error("Failed to parse successful response JSON (deleteTask):", jsonError);
+  } catch {
+    console.error("Failed to parse successful response JSON (deleteTask):");
     throw new Error(`Received OK status (${response.status}) but failed to parse JSON response.`);
   }
 };
@@ -298,7 +298,7 @@ export async function getTaskAssignees(taskId: string, token?: string): Promise<
     let errorData;
     try {
       errorData = JSON.parse(errorText);
-    } catch (jsonError) {
+    } catch {
       throw new Error(
         `Failed to fetch task assignees: ${response.status} ${response.statusText}. Server responded with: ${errorText}`
       );
@@ -308,8 +308,8 @@ export async function getTaskAssignees(taskId: string, token?: string): Promise<
 
   try {
     return await response.json();
-  } catch (jsonError) {
-    console.error("Failed to parse successful response JSON (getTaskAssignees):", jsonError);
+  } catch {
+    console.error("Failed to parse successful response JSON (getTaskAssignees):");
     throw new Error(`Received OK status (${response.status}) but failed to parse JSON response.`);
   }
 }
@@ -340,7 +340,7 @@ export async function assignUserToTask(taskId: string, userId: string, token?: s
     let errorData;
     try {
       errorData = JSON.parse(errorText);
-    } catch (jsonError) {
+    } catch {
       throw new Error(
         `Failed to assign user to task: ${response.status} ${response.statusText}. Server responded with: ${errorText}`
       );
@@ -350,8 +350,8 @@ export async function assignUserToTask(taskId: string, userId: string, token?: s
 
   try {
     return await response.json();
-  } catch (jsonError) {
-    console.error("Failed to parse successful response JSON (assignUserToTask):", jsonError);
+  } catch {
+    console.error("Failed to parse successful response JSON (assignUserToTask):");
     throw new Error(`Received OK status (${response.status}) but failed to parse JSON response.`);
   }
 }
@@ -381,7 +381,7 @@ export async function unassignUserFromTask(taskId: string, userId: string, token
     let errorData;
     try {
       errorData = JSON.parse(errorText);
-    } catch (jsonError) {
+    } catch {
       throw new Error(
         `Failed to unassign user from task: ${response.status} ${response.statusText}. Server responded with: ${errorText}`
       );
@@ -395,8 +395,8 @@ export async function unassignUserFromTask(taskId: string, userId: string, token
 
   try {
     return await response.json();
-  } catch (jsonError) {
-    console.error("Failed to parse successful response JSON (unassignUserFromTask):", jsonError);
+  } catch {
+    console.error("Failed to parse successful response JSON (unassignUserFromTask):");
     throw new Error(`Received OK status (${response.status}) but failed to parse JSON response.`);
   }
 }
@@ -431,7 +431,7 @@ export async function getUserTasks(token?: string, limit = 20, offset = 0): Prom
     let errorData;
     try {
       errorData = JSON.parse(errorText);
-    } catch (jsonError) {
+    } catch {
       throw new Error(
         `Failed to fetch user tasks: ${response.status} ${response.statusText}. Server responded with: ${errorText}`
       );
@@ -441,8 +441,8 @@ export async function getUserTasks(token?: string, limit = 20, offset = 0): Prom
 
   try {
     return await response.json();
-  } catch (jsonError) {
-    console.error("Failed to parse successful response JSON (getUserTasks):", jsonError);
+  } catch {
+    console.error("Failed to parse successful response JSON (getUserTasks):");
     throw new Error(`Received OK status (${response.status}) but failed to parse JSON response.`);
   }
 }

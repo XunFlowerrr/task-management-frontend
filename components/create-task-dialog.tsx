@@ -4,14 +4,7 @@ import React, { useState, useEffect } from "react";
 import { toast } from "sonner";
 import { createTask, CreateTaskData } from "@/lib/api/tasks";
 import { getProjectMembers, ProjectMember } from "@/lib/api/projectMembers";
-import {
-  Plus,
-  CalendarIcon,
-  Check,
-  ChevronsUpDown,
-  ChevronDown,
-  Users,
-} from "lucide-react";
+import { CalendarIcon, ChevronDown } from "lucide-react";
 import { format } from "date-fns";
 import {
   Dialog,
@@ -32,14 +25,6 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import {
-  Command,
-  CommandEmpty,
-  CommandGroup,
-  CommandInput,
-  CommandItem,
-  CommandList,
-} from "@/components/ui/command";
 import { cn } from "@/lib/utils";
 import {
   DropdownMenu,

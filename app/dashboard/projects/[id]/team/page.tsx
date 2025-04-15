@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
 import { useSocket } from "@/hooks/useSocket";
@@ -60,7 +60,7 @@ export default function ProjectTeamPage() {
   const [removeAlertOpen, setRemoveAlertOpen] = useState(false);
   const [inviteDialogOpen, setInviteDialogOpen] = useState(false);
 
-  const fetchData = async () => {
+  const fetchData = useCallback(async () => {
     if (!user?.token || !projectId) return;
     try {
       setLoading(true);
@@ -82,7 +82,7 @@ export default function ProjectTeamPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [user?.token, projectId]);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -93,7 +93,7 @@ export default function ProjectTeamPage() {
     if (user?.token && projectId) {
       fetchData();
     }
-  }, [isAuthenticated, router, user, projectId]);
+  }, [isAuthenticated, router, user, projectId, fetchData]);
 
   // Listen for real-time project member CRUD events
   useSocket("projectMemberAdded", (data: { projectId: string }) => {

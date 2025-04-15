@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ChevronRight, icons, type LucideIcon } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { LayoutList } from "lucide-react";
 import { UsersRound } from "lucide-react";
 import { Settings } from "lucide-react";
@@ -26,12 +26,6 @@ import {
 import { Project } from "@/lib/api/projects";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"; // Import Avatar components
 import { getInitials, generateGradientBackground } from "@/lib/utils"; // Import utils
-
-// Updated to use the Project type directly with optional icon and isActive
-type ProjectWithUIState = Project & {
-  icon?: LucideIcon;
-  isActive?: boolean;
-};
 
 const subMenuItems = [
   {

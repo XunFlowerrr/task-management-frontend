@@ -112,7 +112,7 @@ export default function MyTasksPage() {
 
       return keep;
     });
-  }, [tasks, searchParams]);
+  }, [tasks, statusFilter, dueFilter]);
 
   // Generate filter description
   let filterDescription = "All assigned tasks";

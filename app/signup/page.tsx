@@ -44,7 +44,9 @@ export default function SignUpPage() {
       }
       router.push("/login");
     } catch (err) {
-      setError("Failed to register.");
+      setError(
+        `Failed to register. ${err instanceof Error ? err.message : ""}`
+      );
     }
   };
 

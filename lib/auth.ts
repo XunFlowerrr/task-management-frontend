@@ -57,7 +57,7 @@ export const authOptions: NextAuthOptions = {
         try {
           // Throws if user not found or token invalid
           await getCurrentUser(session.user.token);
-        } catch (e) {
+        } catch {
           // Throw to force sign out if user is gone
           throw new Error("User not found in backend");
         }

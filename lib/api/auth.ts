@@ -1,4 +1,3 @@
-import { getAuthToken } from "@/hooks/useAuth";
 import { getServerSession } from "next-auth";
 import { authOptions } from "../auth";
 

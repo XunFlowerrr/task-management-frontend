@@ -37,7 +37,7 @@ export async function addProjectMember(projectId: string, userId: string, token?
     let errorData;
     try {
       errorData = JSON.parse(errorText);
-    } catch (jsonError) {
+    } catch {
       throw new Error(
         `Failed to add project member: ${response.status} ${response.statusText}. Server responded with: ${errorText}`
       );
@@ -47,8 +47,8 @@ export async function addProjectMember(projectId: string, userId: string, token?
 
   try {
     return await response.json();
-  } catch (jsonError) {
-    console.error("Failed to parse successful response JSON (addProjectMember):", jsonError);
+  } catch {
+    console.error("Failed to parse successful response JSON (addProjectMember):");
     throw new Error(`Received OK status (${response.status}) but failed to parse JSON response.`);
   }
 }
@@ -78,7 +78,7 @@ export async function removeProjectMember(projectId: string, userId: string, tok
     let errorData;
     try {
       errorData = JSON.parse(errorText);
-    } catch (jsonError) {
+    } catch {
       throw new Error(
         `Failed to remove project member: ${response.status} ${response.statusText}. Server responded with: ${errorText}`
       );
@@ -88,8 +88,8 @@ export async function removeProjectMember(projectId: string, userId: string, tok
 
   try {
     return await response.json();
-  } catch (jsonError) {
-    console.error("Failed to parse successful response JSON (removeProjectMember):", jsonError);
+  } catch {
+    console.error("Failed to parse successful response JSON (removeProjectMember):");
     throw new Error(`Received OK status (${response.status}) but failed to parse JSON response.`);
   }
 }
@@ -119,7 +119,7 @@ export async function getProjectMembers(projectId: string, token?: string): Prom
     let errorData;
     try {
       errorData = JSON.parse(errorText);
-    } catch (jsonError) {
+    } catch {
       throw new Error(
         `Failed to get project members: ${response.status} ${response.statusText}. Server responded with: ${errorText}`
       );
@@ -129,8 +129,8 @@ export async function getProjectMembers(projectId: string, token?: string): Prom
 
   try {
     return await response.json();
-  } catch (jsonError) {
-    console.error("Failed to parse successful response JSON (getProjectMembers):", jsonError);
+  } catch {
+    console.error("Failed to parse successful response JSON (getProjectMembers):");
     throw new Error(`Received OK status (${response.status}) but failed to parse JSON response.`);
   }
 }

@@ -7,7 +7,7 @@ import { ReduxSidebarProvider } from "@/components/ui/redux-sidebar";
 import { BreadcrumbHelper } from "@/components/ui/breadcrumb-helper";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getAllProjectsClient, Project } from "@/lib/api/projects";
 import { Folders, Info, Plus, AlertTriangle } from "lucide-react";
 import { getUserTasks, Task } from "@/lib/api/tasks";
@@ -50,23 +50,8 @@ export default function Dashboard() {
     }
   }, [isAuthenticated, user, router]);
 
-  useEffect(() => {
-    // Only fetch data if authenticated and we have a token
-    if (user?.token) {
-      fetchProjects();
-      fetchTasks();
-    }
-  }, []);
-
-  // Listen for real-time project create/delete events
-  useSocket("projectCreated", () => {
-    fetchProjects();
-  });
-  useSocket("projectDeleted", () => {
-    fetchProjects();
-  });
-
-  const fetchProjects = async () => {
+  // Move fetchProjects and fetchTasks above useEffect and wrap in useCallback
+  const fetchProjects = useCallback(async () => {
     if (!user?.token) return;
 
     setIsLoading(true);
@@ -82,9 +67,9 @@ export default function Dashboard() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [user?.token]);
 
-  const fetchTasks = async () => {
+  const fetchTasks = useCallback(async () => {
     if (!user?.token) return;
 
     try {
@@ -94,7 +79,20 @@ export default function Dashboard() {
       console.error("Failed to fetch tasks:", error);
       toast.error("Failed to load tasks");
     }
-  };
+  }, [user?.token]);
+
+  useEffect(() => {
+    fetchProjects();
+    fetchTasks();
+  }, [fetchProjects, fetchTasks]);
+
+  // Listen for real-time project create/delete events
+  useSocket("projectCreated", () => {
+    fetchProjects();
+  });
+  useSocket("projectDeleted", () => {
+    fetchProjects();
+  });
 
   // Filter projects for uniqueness *before* pagination
   const uniqueProjects = projects.filter(
@@ -107,10 +105,6 @@ export default function Dashboard() {
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
   const endIndex = startIndex + ITEMS_PER_PAGE;
   const currentProjects = uniqueProjects.slice(startIndex, endIndex);
-
-  const handlePageChange = (page: number) => {
-    setCurrentPage(page);
-  };
 
   const handleProjectCreated = () => {
     fetchProjects();
@@ -221,7 +215,7 @@ export default function Dashboard() {
                 <Folders className="w-10 h-10 mx-auto text-muted-foreground" />
                 <h3 className="mt-4 text-lg font-medium">No projects found</h3>
                 <p className="mt-2 text-sm text-muted-foreground">
-                  You haven't created any projects yet.
+                  You haven&#39;t created any projects yet.
                 </p>
                 <CreateProjectDialog
                   token={user?.token}

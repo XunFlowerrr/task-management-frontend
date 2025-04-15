@@ -3,7 +3,6 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { createProject } from "@/lib/api/projects";
-import { Plus } from "lucide-react";
 import {
   Dialog,
   DialogContent,

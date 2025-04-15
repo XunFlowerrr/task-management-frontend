@@ -21,15 +21,7 @@ import { ProjectNav } from "./project-nav";
 import { useState } from "react";
 import { getAllProjects, Project } from "@/lib/api/projects";
 import Link from "next/link";
-import {
-  ChevronRight,
-  Home,
-  LayoutDashboard,
-  Plus,
-  Settings,
-  FileText,
-  LayoutList,
-} from "lucide-react";
+import { LayoutDashboard, Plus, LayoutList } from "lucide-react";
 import { CreateProjectDialog } from "./create-project-dialog";
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -40,8 +32,9 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
   // Fetch projects from the API
   React.useEffect(() => {
     const fetchProjects = async () => {
+      if (!user?.token) return; // Check if token exists
       try {
-        const response = await getAllProjects(user?.token!);
+        const response = await getAllProjects(user.token); // Removed non-null assertion
         setProjects(response);
       } catch (error) {
         console.error("Error fetching projects:", error);

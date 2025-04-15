@@ -3,8 +3,6 @@
 import * as React from "react";
 import { Moon, Sun } from "lucide-react";
 import { useTheme } from "next-themes";
-import { useEffect } from "react";
-import { useRouter } from "next/navigation";
 
 import { Button } from "@/components/ui/button";
 import {
@@ -42,8 +40,6 @@ export function ModeToggle() {
 }
 
 export default function ModePage() {
-  const router = useRouter();
-
   return (
     <div className="flex h-screen items-center justify-center">
       <ModeToggle />

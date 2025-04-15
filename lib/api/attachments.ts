@@ -93,7 +93,7 @@ export async function uploadAttachment(
     let errorData;
     try {
       errorData = await response.json();
-    } catch (e) {
+    } catch {
       throw new Error(`Failed to upload attachment: ${response.status} ${response.statusText}`);
     }
     throw new Error(errorData?.error || `Failed to upload attachment: ${response.status} ${response.statusText}`);
@@ -243,7 +243,7 @@ export async function deleteAttachment(attachmentId: string, token?: string): Pr
     let errorData;
     try {
       errorData = await response.json();
-    } catch (e) {
+    } catch {
       throw new Error(`Failed to delete attachment: ${response.status} ${response.statusText}`);
     }
     throw new Error(errorData?.error || `Failed to delete attachment: ${response.status} ${response.statusText}`);

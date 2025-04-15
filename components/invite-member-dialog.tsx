@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogContent,
@@ -42,8 +42,11 @@ export function InviteMemberDialog({
   const [isSearching, setIsSearching] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
 
-  const debouncedSearch = useCallback(
-    debounce(async (query: string) => {
+  const debouncedSearchRef =
+    useRef<ReturnType<typeof debounce<(query: string) => Promise<void>>>>();
+
+  useEffect(() => {
+    debouncedSearchRef.current = debounce(async (query: string) => {
       if (!query.trim()) {
         setSearchResults([]);
         setIsSearching(false);
@@ -65,16 +68,22 @@ export function InviteMemberDialog({
       } finally {
         setIsSearching(false);
       }
-    }, 500),
-    [token, stagedUsers, projectId]
-  );
+    }, 500);
+
+    return () => {
+      debouncedSearchRef.current?.cancel();
+    };
+  }, [token, projectId, stagedUsers]);
 
   useEffect(() => {
-    debouncedSearch(searchQuery);
+    if (debouncedSearchRef.current) {
+      debouncedSearchRef.current(searchQuery);
+    }
+
     return () => {
-      debouncedSearch.cancel();
+      debouncedSearchRef.current?.cancel();
     };
-  }, [searchQuery, debouncedSearch]);
+  }, [searchQuery]);
 
   const handleAddUser = (user: UserSearchResult) => {
     if (!stagedUsers.some((u) => u.user_id === user.user_id)) {
@@ -105,7 +114,6 @@ export function InviteMemberDialog({
 
     setIsAdding(true);
     let successCount = 0;
-    let errorCount = 0;
 
     try {
       const addPromises = stagedUsers.map((user) =>
@@ -115,7 +123,6 @@ export function InviteMemberDialog({
           })
           .catch((err) => {
             console.error(`Failed to add ${user.username}:`, err);
-            errorCount++;
             const errorMessage = err.message?.includes("already a member")
               ? `${user.username} is already a member.`
               : `Failed to add ${user.username}: ${
@@ -184,7 +191,7 @@ export function InviteMemberDialog({
               <div className="p-2 space-y-1">
                 {searchQuery && !isSearching && searchResults.length === 0 && (
                   <p className="text-center text-sm text-muted-foreground py-4">
-                    No users found matching "{searchQuery}".
+                    No users found matching &quot;{searchQuery}&quot;.
                   </p>
                 )}
                 {searchResults.map((user) => (

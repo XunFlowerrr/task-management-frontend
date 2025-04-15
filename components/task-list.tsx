@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { Task, Assignee } from "@/lib/api/tasks";
+import { Task } from "@/lib/api/tasks";
 import {
   Table,
   TableBody,
@@ -29,7 +29,7 @@ import {
   getInitials,
 } from "@/lib/utils";
 import Link from "next/link";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Tooltip,
   TooltipContent,
@@ -56,6 +56,11 @@ interface TaskListProps {
   onDeleteTask?: (taskId: string) => void;
 }
 
+// Define an interface that includes the optional project_name
+interface TaskWithProjectName extends Task {
+  project_name?: string;
+}
+
 interface TaskListPaginationProps {
   page: number;
   pageSize: number;
@@ -67,7 +72,6 @@ const TaskListComponent = ({
   tasks,
   isLoading,
   error,
-  title,
   showProjectColumn = false,
   onEditTask,
   onDeleteTask,
@@ -146,7 +150,8 @@ const TaskListComponent = ({
                         href={`/dashboard/projects/${task.project_id}`}
                         className="hover:underline text-sm"
                       >
-                        {(task as any).project_name || task.project_id}
+                        {(task as TaskWithProjectName).project_name ||
+                          task.project_id}
                       </Link>
                     </TableCell>
                   )}

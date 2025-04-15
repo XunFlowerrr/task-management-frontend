@@ -142,7 +142,7 @@ export default function ProjectTasksPage() {
 
       return keep;
     });
-  }, [tasks, searchParams]);
+  }, [tasks, statusFilter, dueFilter]);
 
   // Generate filter description
   let filterDescription = `All tasks within the '${

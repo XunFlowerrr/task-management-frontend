@@ -5,9 +5,7 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogFooter, // Optional: If you want a footer
 } from "@/components/ui/dialog";
-import { Button } from "@/components/ui/button"; // Optional: For close button in footer
 import Image from "next/image"; // Use Next.js Image for optimization if applicable
 
 interface AttachmentPreviewModalProps {

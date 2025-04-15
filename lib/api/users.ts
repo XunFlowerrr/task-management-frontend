@@ -45,7 +45,7 @@ export async function searchUsers(query: string, projectId: string, token?: stri
     let errorData;
     try {
       errorData = JSON.parse(errorText);
-    } catch (jsonError) {
+    } catch  {
       throw new Error(
         `Failed to search users: ${response.status} ${response.statusText}. Server responded with: ${errorText}`
       );
