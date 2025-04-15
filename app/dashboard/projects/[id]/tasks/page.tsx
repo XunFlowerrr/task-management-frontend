@@ -33,6 +33,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { useSocket } from "@/hooks/useSocket";
 
 export default function ProjectTasksPage() {
   const { user, isAuthenticated } = useAuth();
@@ -241,6 +242,41 @@ export default function ProjectTasksPage() {
       setDeleteAlertOpen(false);
     }
   }, [deletingTaskId, user?.token, refreshTasks]);
+
+  // Listen for real-time task CRUD events
+  useSocket(
+    "taskUpdated",
+    useCallback(
+      (data: { taskId: string; projectId: string }) => {
+        if (data.projectId === projectId) {
+          refreshTasks();
+        }
+      },
+      [projectId, refreshTasks]
+    )
+  );
+  useSocket(
+    "taskCreated",
+    useCallback(
+      (data: { taskId: string; projectId: string }) => {
+        if (data.projectId === projectId) {
+          refreshTasks();
+        }
+      },
+      [projectId, refreshTasks]
+    )
+  );
+  useSocket(
+    "taskDeleted",
+    useCallback(
+      (data: { taskId: string; projectId: string }) => {
+        if (data.projectId === projectId) {
+          refreshTasks();
+        }
+      },
+      [projectId, refreshTasks]
+    )
+  );
 
   if (!isAuthenticated || isLoading) {
     return (

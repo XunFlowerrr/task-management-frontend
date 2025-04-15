@@ -87,6 +87,7 @@ import {
 } from "@/lib/utils";
 import { AttachmentPreviewModal } from "@/components/ui/AttachmentPreviewModal";
 import { EditTaskDialog } from "@/components/edit-task-dialog";
+import { useSocket } from "@/hooks/useSocket";
 
 const API_URL =
   process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
@@ -202,6 +203,14 @@ export default function TaskDetailPage() {
       Object.values(previewUrls).forEach(URL.revokeObjectURL);
     };
   }, [attachments, user?.token]);
+
+  // Listen for real-time attachment CRUD events
+  useSocket("attachmentCreated", (data: { taskId: string }) => {
+    if (data.taskId === taskId) fetchTaskData();
+  });
+  useSocket("attachmentDeleted", (data: { taskId: string }) => {
+    if (data.taskId === taskId) fetchTaskData();
+  });
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     if (event.target.files && event.target.files[0]) {

@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuth } from "@/hooks/useAuth";
+import { useSocket } from "@/hooks/useSocket";
 import {
   getProjectMembers,
   removeProjectMember,
@@ -93,6 +94,14 @@ export default function ProjectTeamPage() {
       fetchData();
     }
   }, [isAuthenticated, router, user, projectId]);
+
+  // Listen for real-time project member CRUD events
+  useSocket("projectMemberAdded", (data: { projectId: string }) => {
+    if (data.projectId === projectId) fetchData();
+  });
+  useSocket("projectMemberRemoved", (data: { projectId: string }) => {
+    if (data.projectId === projectId) fetchData();
+  });
 
   const handleRemoveMember = (userId: string) => {
     setRemovingMemberId(userId);

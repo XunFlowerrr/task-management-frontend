@@ -52,6 +52,7 @@ import {
 } from "@/components/ui/alert-dialog";
 import { toast } from "sonner";
 import { InviteMemberDialog } from "@/components/invite-member-dialog";
+import { useSocket } from "@/hooks/useSocket";
 
 export default function ProjectDashboard() {
   const { isAuthenticated, user } = useAuth();
@@ -120,6 +121,14 @@ export default function ProjectDashboard() {
       fetchProjectData();
     }
   }, []);
+
+  // Listen for real-time project updates
+  useSocket("projectUpdated", (data: { projectId: string }) => {
+    if (data.projectId === projectId && user?.token) {
+      // Refresh project data
+      getProject(projectId, user.token).then(setProject);
+    }
+  });
 
   const refreshTasks = async () => {
     if (user?.token) {

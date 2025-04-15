@@ -27,6 +27,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { CreateProjectDialog } from "@/components/create-project-dialog";
 import { getTodayDateString } from "@/lib/utils";
+import { useSocket } from "@/hooks/useSocket";
 
 export default function Dashboard() {
   const { isAuthenticated, user } = useAuth();
@@ -56,6 +57,14 @@ export default function Dashboard() {
       fetchTasks();
     }
   }, []);
+
+  // Listen for real-time project create/delete events
+  useSocket("projectCreated", () => {
+    fetchProjects();
+  });
+  useSocket("projectDeleted", () => {
+    fetchProjects();
+  });
 
   const fetchProjects = async () => {
     if (!user?.token) return;
