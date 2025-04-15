@@ -92,7 +92,7 @@ export async function createTask(data: CreateTaskData, token?: string): Promise<
 /**
  * Get all tasks for a project
  */
-export async function getAllTasks(projectId: string, token?: string): Promise<Task[]> {
+export async function getAllTasks(projectId: string, token?: string, limit = 20, offset = 0): Promise<Task[]> {
   if (!token) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.token) {
@@ -101,7 +101,13 @@ export async function getAllTasks(projectId: string, token?: string): Promise<Ta
     token = session.user.token;
   }
 
-  const response = await fetch(`${API_URL}/tasks?projectId=${projectId}`, {
+  const params = new URLSearchParams({
+    projectId,
+    limit: limit.toString(),
+    offset: offset.toString(),
+  });
+
+  const response = await fetch(`${API_URL}/tasks?${params.toString()}`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -398,7 +404,7 @@ export async function unassignUserFromTask(taskId: string, userId: string, token
 /**
  * Get tasks assigned to the current user
  */
-export async function getUserTasks(token?: string): Promise<Task[]> {
+export async function getUserTasks(token?: string, limit = 20, offset = 0): Promise<Task[]> {
   if (!token) {
     const session = await getServerSession(authOptions);
     if (!session?.user?.token) {
@@ -407,7 +413,12 @@ export async function getUserTasks(token?: string): Promise<Task[]> {
     token = session.user.token;
   }
 
-  const response = await fetch(`${API_URL}/tasks/me`, {
+  const params = new URLSearchParams({
+    limit: limit.toString(),
+    offset: offset.toString(),
+  });
+
+  const response = await fetch(`${API_URL}/tasks/me?${params.toString()}`, {
     method: "GET",
     headers: {
       Authorization: `Bearer ${token}`,

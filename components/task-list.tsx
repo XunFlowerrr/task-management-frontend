@@ -25,7 +25,7 @@ import {
   getPriorityBadgeVariant,
   getStatusBadgeVariant,
   generateGradientBackground,
-  getInitials, // Import getInitials from utils
+  getInitials,
 } from "@/lib/utils";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -35,6 +35,15 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
+import {
+  Pagination,
+  PaginationContent,
+  PaginationItem,
+  PaginationLink,
+  PaginationPrevious,
+  PaginationNext,
+  PaginationEllipsis,
+} from "@/components/ui/pagination";
 
 interface TaskListProps {
   tasks: Task[];
@@ -44,7 +53,13 @@ interface TaskListProps {
   showProjectColumn?: boolean;
   onEditTask?: (taskId: string) => void;
   onDeleteTask?: (taskId: string) => void;
-  // Add onAssigneeClick or similar if needed later
+}
+
+interface TaskListPaginationProps {
+  page: number;
+  pageSize: number;
+  total: number;
+  onPageChange: (page: number) => void;
 }
 
 export function TaskList({
@@ -55,7 +70,11 @@ export function TaskList({
   showProjectColumn = false,
   onEditTask,
   onDeleteTask,
-}: TaskListProps) {
+  page = 1,
+  pageSize = 20,
+  total = 0,
+  onPageChange,
+}: TaskListProps & Partial<TaskListPaginationProps>) {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -89,144 +108,209 @@ export function TaskList({
   }
 
   return (
-    <TooltipProvider>
-      <div className="rounded-md border shadow-sm bg-card">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Task Name</TableHead>
-              {showProjectColumn && <TableHead>Project</TableHead>}
-              <TableHead>Due Date</TableHead>
-              <TableHead>Priority</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Assignees</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {tasks.map((task) => (
-              <TableRow key={task.task_id}>
-                <TableCell className="font-medium">
-                  <Link
-                    href={`/dashboard/projects/${task.project_id}/tasks/${task.task_id}`}
-                    className="hover:underline"
-                  >
-                    {task.task_name}
-                  </Link>
-                  {task.task_description && (
-                    <p className="text-xs text-muted-foreground truncate max-w-xs">
-                      {task.task_description}
-                    </p>
-                  )}
-                </TableCell>
-                {showProjectColumn && (
-                  <TableCell>
-                    <Link
-                      href={`/dashboard/projects/${task.project_id}`}
-                      className="hover:underline text-sm"
-                    >
-                      {/* Assuming project_name is available on Task for 'My Tasks' view */}
-                      {(task as any).project_name || task.project_id}
-                    </Link>
-                  </TableCell>
-                )}
-                <TableCell>{formatDate(task.due_date, "PP")}</TableCell>
-                <TableCell>
-                  <Badge variant={getPriorityBadgeVariant(task.priority)}>
-                    {formatPriority(task.priority)}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <Badge variant={getStatusBadgeVariant(task.status)}>
-                    {task.status}
-                  </Badge>
-                </TableCell>
-                <TableCell>
-                  <div className="flex -space-x-2">
-                    {task.assignees?.slice(0, 3).map((assignee) => (
-                      <Tooltip key={assignee.user_id}>
-                        <TooltipTrigger asChild>
-                          <Avatar className="h-6 w-6 border-2 border-background">
-                            {/* Add AvatarImage if you have URLs */}
-                            <AvatarFallback
-                              style={{
-                                background: generateGradientBackground(
-                                  assignee.username || assignee.user_id // Use username or ID as seed
-                                ),
-                                color: "white", // Ensure text is visible
-                                fontSize: "0.7rem", // Adjust font size if needed
-                              }}
-                            >
-                              {getInitials(assignee.username)}
-                            </AvatarFallback>
-                          </Avatar>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>
-                            {assignee.username ||
-                              assignee.email ||
-                              assignee.user_id}
-                          </p>
-                        </TooltipContent>
-                      </Tooltip>
-                    ))}
-                    {task.assignees && task.assignees.length > 3 && (
-                      <Avatar className="h-6 w-6 border-2 border-background">
-                        <AvatarFallback>
-                          +{task.assignees.length - 3}
-                        </AvatarFallback>
-                      </Avatar>
-                    )}
-                    {!task.assignees ||
-                      (task.assignees.length === 0 && (
-                        <span className="text-xs text-muted-foreground">
-                          Unassigned
-                        </span>
-                      ))}
-                  </div>
-                </TableCell>
-                <TableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-4 w-4" />
-                        <span className="sr-only">Task actions</span>
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem asChild>
-                        <Link
-                          href={`/dashboard/projects/${task.project_id}/tasks/${task.task_id}`}
-                        >
-                          <Eye className="mr-2 h-4 w-4" /> View Details
-                        </Link>
-                      </DropdownMenuItem>
-                      {onEditTask && (
-                        <DropdownMenuItem
-                          onClick={() => onEditTask(task.task_id)}
-                        >
-                          <Edit className="mr-2 h-4 w-4" /> Edit
-                        </DropdownMenuItem>
-                      )}
-                      {onDeleteTask && (
-                        <>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem
-                            onClick={() => onDeleteTask(task.task_id)}
-                            className="text-destructive focus:text-destructive"
-                          >
-                            <Trash2 className="mr-2 h-4 w-4" /> Delete
-                          </DropdownMenuItem>
-                        </>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </TableCell>
+    <>
+      <TooltipProvider>
+        <div className="rounded-md border shadow-sm bg-card">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Task Name</TableHead>
+                {showProjectColumn && <TableHead>Project</TableHead>}
+                <TableHead>Due Date</TableHead>
+                <TableHead>Priority</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Assignees</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
               </TableRow>
-            ))}
-          </TableBody>
-        </Table>
-      </div>
-    </TooltipProvider>
+            </TableHeader>
+            <TableBody>
+              {tasks.map((task) => (
+                <TableRow key={task.task_id}>
+                  <TableCell className="font-medium">
+                    <Link
+                      href={`/dashboard/projects/${task.project_id}/tasks/${task.task_id}`}
+                      className="hover:underline"
+                    >
+                      {task.task_name}
+                    </Link>
+                    {task.task_description && (
+                      <p className="text-xs text-muted-foreground truncate max-w-xs">
+                        {task.task_description}
+                      </p>
+                    )}
+                  </TableCell>
+                  {showProjectColumn && (
+                    <TableCell>
+                      <Link
+                        href={`/dashboard/projects/${task.project_id}`}
+                        className="hover:underline text-sm"
+                      >
+                        {(task as any).project_name || task.project_id}
+                      </Link>
+                    </TableCell>
+                  )}
+                  <TableCell>{formatDate(task.due_date, "PP")}</TableCell>
+                  <TableCell>
+                    <Badge variant={getPriorityBadgeVariant(task.priority)}>
+                      {formatPriority(task.priority)}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <Badge variant={getStatusBadgeVariant(task.status)}>
+                      {task.status}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <div className="flex -space-x-2">
+                      {task.assignees?.slice(0, 3).map((assignee) => (
+                        <Tooltip key={assignee.user_id}>
+                          <TooltipTrigger asChild>
+                            <Avatar className="h-6 w-6 border-2 border-background">
+                              <AvatarFallback
+                                style={{
+                                  background: generateGradientBackground(
+                                    assignee.username || assignee.user_id
+                                  ),
+                                  color: "white",
+                                  fontSize: "0.7rem",
+                                }}
+                              >
+                                {getInitials(assignee.username)}
+                              </AvatarFallback>
+                            </Avatar>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>
+                              {assignee.username ||
+                                assignee.email ||
+                                assignee.user_id}
+                            </p>
+                          </TooltipContent>
+                        </Tooltip>
+                      ))}
+                      {task.assignees && task.assignees.length > 3 && (
+                        <Avatar className="h-6 w-6 border-2 border-background">
+                          <AvatarFallback>
+                            +{task.assignees.length - 3}
+                          </AvatarFallback>
+                        </Avatar>
+                      )}
+                      {!task.assignees ||
+                        (task.assignees.length === 0 && (
+                          <span className="text-xs text-muted-foreground">
+                            Unassigned
+                          </span>
+                        ))}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                          <MoreHorizontal className="h-4 w-4" />
+                          <span className="sr-only">Task actions</span>
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuItem asChild>
+                          <Link
+                            href={`/dashboard/projects/${task.project_id}/tasks/${task.task_id}`}
+                          >
+                            <Eye className="mr-2 h-4 w-4" /> View Details
+                          </Link>
+                        </DropdownMenuItem>
+                        {onEditTask && (
+                          <DropdownMenuItem
+                            onClick={() => onEditTask(task.task_id)}
+                          >
+                            <Edit className="mr-2 h-4 w-4" /> Edit
+                          </DropdownMenuItem>
+                        )}
+                        {onDeleteTask && (
+                          <>
+                            <DropdownMenuSeparator />
+                            <DropdownMenuItem
+                              onClick={() => onDeleteTask(task.task_id)}
+                              className="text-destructive focus:text-destructive"
+                            >
+                              <Trash2 className="mr-2 h-4 w-4" /> Delete
+                            </DropdownMenuItem>
+                          </>
+                        )}
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      </TooltipProvider>
+      {total > pageSize && onPageChange && (
+        <Pagination className="mt-4">
+          <PaginationContent>
+            <PaginationItem>
+              <PaginationPrevious
+                onClick={() => onPageChange(Math.max(1, page - 1))}
+                aria-disabled={page === 1}
+                tabIndex={page === 1 ? -1 : 0}
+                href="#"
+              />
+            </PaginationItem>
+            {(() => {
+              const totalPages = Math.ceil(total / pageSize);
+              const pageNumbers = [];
+              for (let i = 1; i <= totalPages; i++) {
+                if (
+                  i === 1 ||
+                  i === totalPages ||
+                  (i >= page - 2 && i <= page + 2)
+                ) {
+                  pageNumbers.push(i);
+                } else if (
+                  (i === page - 3 && page - 3 > 1) ||
+                  (i === page + 3 && page + 3 < totalPages)
+                ) {
+                  pageNumbers.push("...");
+                }
+              }
+              let lastWasEllipsis = false;
+              return pageNumbers.map((num, idx) => {
+                if (num === "...") {
+                  if (lastWasEllipsis) return null;
+                  lastWasEllipsis = true;
+                  return (
+                    <PaginationItem key={"ellipsis-" + idx}>
+                      <PaginationEllipsis />
+                    </PaginationItem>
+                  );
+                } else {
+                  lastWasEllipsis = false;
+                  return (
+                    <PaginationItem key={num}>
+                      <PaginationLink
+                        isActive={num === page}
+                        onClick={() => onPageChange(Number(num))}
+                        href="#"
+                      >
+                        {num}
+                      </PaginationLink>
+                    </PaginationItem>
+                  );
+                }
+              });
+            })()}
+            <PaginationItem>
+              <PaginationNext
+                onClick={() => onPageChange(page + 1)}
+                aria-disabled={page * pageSize >= total}
+                tabIndex={page * pageSize >= total ? -1 : 0}
+                href="#"
+              />
+            </PaginationItem>
+          </PaginationContent>
+        </Pagination>
+      )}
+    </>
   );
 }

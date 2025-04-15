@@ -1,6 +1,7 @@
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import userLogIn from "./userLogIn";
+import { getCurrentUser } from "./api/auth";
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -50,6 +51,16 @@ export const authOptions: NextAuthOptions = {
         session.user.email = token.email as string;
         session.user.name = token.name as string;
         session.user.token = token.token as string;
+      }
+      // Backend user existence check
+      if (session.user?.token) {
+        try {
+          // Throws if user not found or token invalid
+          await getCurrentUser(session.user.token);
+        } catch (e) {
+          // Throw to force sign out if user is gone
+          throw new Error("User not found in backend");
+        }
       }
       return session;
     },
