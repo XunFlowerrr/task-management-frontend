@@ -252,9 +252,7 @@ export function TaskAttachments({ taskId, token }: TaskAttachmentsProps) {
                           rel="noopener noreferrer"
                           className="font-medium hover:underline truncate block"
                         >
-                          {att.file_name ||
-                            att.attachment_name ||
-                            "Link Attachment"}
+                          {att.file_name || "Link Attachment"}
                         </Link>
                       ) : (
                         <span className="font-medium truncate block">

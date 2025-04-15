@@ -174,7 +174,6 @@ export default function Dashboard() {
               label="Overdue Tasks"
               data={overdueTasksCount}
               onClick={{ url: "/dashboard/tasks?status=overdue" }}
-              variant="destructive"
             />
             <SummaryCard
               icon={<Folders />}

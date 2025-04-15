@@ -78,6 +78,12 @@ export default function ProjectDashboard() {
   }, [isAuthenticated, router]);
 
   const fetchProjectData = useCallback(async () => {
+    if (!user?.token) {
+      setError("Authentication token is missing.");
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
       setError(null);
@@ -110,7 +116,7 @@ export default function ProjectDashboard() {
       setError(errorMessage);
       setLoading(false);
     }
-  }, [projectId, user.token]);
+  }, [projectId, user?.token]);
 
   useEffect(() => {
     fetchProjectData();

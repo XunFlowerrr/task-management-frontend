@@ -42,8 +42,10 @@ export function InviteMemberDialog({
   const [isSearching, setIsSearching] = useState(false);
   const [isAdding, setIsAdding] = useState(false);
 
-  const debouncedSearchRef =
-    useRef<ReturnType<typeof debounce<(query: string) => Promise<void>>>>();
+  // Provide null as initial value and include null in the type
+  const debouncedSearchRef = useRef<ReturnType<
+    typeof debounce<(query: string) => Promise<void>>
+  > | null>(null);
 
   useEffect(() => {
     debouncedSearchRef.current = debounce(async (query: string) => {
