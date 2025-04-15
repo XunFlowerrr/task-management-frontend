@@ -1,5 +1,6 @@
 "use client";
 
+import React from "react";
 import { Task, Assignee } from "@/lib/api/tasks";
 import {
   Table,
@@ -62,7 +63,7 @@ interface TaskListPaginationProps {
   onPageChange: (page: number) => void;
 }
 
-export function TaskList({
+const TaskListComponent = ({
   tasks,
   isLoading,
   error,
@@ -74,7 +75,7 @@ export function TaskList({
   pageSize = 20,
   total = 0,
   onPageChange,
-}: TaskListProps & Partial<TaskListPaginationProps>) {
+}: TaskListProps & Partial<TaskListPaginationProps>) => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center p-8">
@@ -313,4 +314,6 @@ export function TaskList({
       )}
     </>
   );
-}
+};
+
+export const TaskList = React.memo(TaskListComponent);

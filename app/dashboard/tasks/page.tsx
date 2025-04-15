@@ -7,7 +7,7 @@ import { ReduxSidebarProvider } from "@/components/ui/redux-sidebar";
 import { BreadcrumbHelper } from "@/components/ui/breadcrumb-helper";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { getUserTasks, Task } from "@/lib/api/tasks";
 import { TaskList } from "@/components/task-list";
 import { toast } from "sonner";
@@ -125,19 +125,22 @@ export default function MyTasksPage() {
   }
 
   // Handler for changing the filter via Select
-  const handleFilterChange = (value: string) => {
-    let query = {};
-    if (value === "today") {
-      query = { due: "today" };
-    } else if (value === "pending") {
-      query = { status: "pending" };
-    } else if (value === "overdue") {
-      query = { status: "overdue" };
-    }
+  const handleFilterChange = useCallback(
+    (value: string) => {
+      let query = {};
+      if (value === "today") {
+        query = { due: "today" };
+      } else if (value === "pending") {
+        query = { status: "pending" };
+      } else if (value === "overdue") {
+        query = { status: "overdue" };
+      }
 
-    const params = new URLSearchParams(query);
-    router.push(`/dashboard/tasks?${params.toString()}`);
-  };
+      const params = new URLSearchParams(query);
+      router.push(`/dashboard/tasks?${params.toString()}`);
+    },
+    [router]
+  );
 
   // Show loading state while checking auth or fetching initial data
   if (!isAuthenticated || (isLoading && tasks.length === 0)) {

@@ -7,7 +7,7 @@ import { ReduxSidebarProvider } from "@/components/ui/redux-sidebar";
 import { BreadcrumbHelper } from "@/components/ui/breadcrumb-helper";
 import { useAuth } from "@/hooks/useAuth";
 import { useRouter, useParams, useSearchParams } from "next/navigation";
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { getAllTasks, Task, deleteTask } from "@/lib/api/tasks";
 import { getProject, Project } from "@/lib/api/projects";
 import { TaskList } from "@/components/task-list";
@@ -158,23 +158,28 @@ export default function ProjectTasksPage() {
   }
 
   // Handler for changing the filter via Select
-  const handleFilterChange = (value: string) => {
-    let query = {};
-    if (value === "soon") {
-      query = { due: "soon" };
-    } else if (value === "completed") {
-      query = { status: "completed" };
-    } else if (value === "in-progress") {
-      query = { status: "in-progress" };
-    } else if (value === "pending") {
-      query = { status: "pending" };
-    }
+  const handleFilterChange = useCallback(
+    (value: string) => {
+      let query = {};
+      if (value === "soon") {
+        query = { due: "soon" };
+      } else if (value === "completed") {
+        query = { status: "completed" };
+      } else if (value === "in-progress") {
+        query = { status: "in-progress" };
+      } else if (value === "pending") {
+        query = { status: "pending" };
+      }
 
-    const params = new URLSearchParams(query);
-    router.push(`/dashboard/projects/${projectId}/tasks?${params.toString()}`);
-  };
+      const params = new URLSearchParams(query);
+      router.push(
+        `/dashboard/projects/${projectId}/tasks?${params.toString()}`
+      );
+    },
+    [router, projectId]
+  );
 
-  const refreshTasks = async () => {
+  const refreshTasks = useCallback(async () => {
     if (user?.token) {
       try {
         const tasksData = await getAllTasks(projectId, user.token);
@@ -184,37 +189,40 @@ export default function ProjectTasksPage() {
         toast.error("Failed to refresh task list.");
       }
     }
-  };
+  }, [user?.token, projectId]);
 
-  const handleTaskCreated = () => {
+  const handleTaskCreated = useCallback(() => {
     refreshTasks();
     setCreateTaskOpen(false);
     toast.success("Task created successfully!");
-  };
+  }, [refreshTasks]);
 
-  const handleTaskUpdated = () => {
+  const handleTaskUpdated = useCallback(() => {
     refreshTasks();
     setEditTaskOpen(false);
     setEditingTask(null);
     toast.success("Task updated successfully!");
-  };
+  }, [refreshTasks]);
 
-  const handleEditTaskClick = (taskId: string) => {
-    const taskToEdit = tasks.find((task) => task.task_id === taskId);
-    if (taskToEdit) {
-      setEditingTask(taskToEdit);
-      setEditTaskOpen(true);
-    } else {
-      toast.error("Could not find the task to edit.");
-    }
-  };
+  const handleEditTaskClick = useCallback(
+    (taskId: string) => {
+      const taskToEdit = tasks.find((task) => task.task_id === taskId);
+      if (taskToEdit) {
+        setEditingTask(taskToEdit);
+        setEditTaskOpen(true);
+      } else {
+        toast.error("Could not find the task to edit.");
+      }
+    },
+    [tasks]
+  );
 
-  const handleDeleteTaskClick = (taskId: string) => {
+  const handleDeleteTaskClick = useCallback((taskId: string) => {
     setDeletingTaskId(taskId);
     setDeleteAlertOpen(true);
-  };
+  }, []);
 
-  const confirmDeleteTask = async () => {
+  const confirmDeleteTask = useCallback(async () => {
     if (!deletingTaskId || !user?.token) return;
 
     try {
@@ -232,7 +240,7 @@ export default function ProjectTasksPage() {
       setDeletingTaskId(null);
       setDeleteAlertOpen(false);
     }
-  };
+  }, [deletingTaskId, user?.token, refreshTasks]);
 
   if (!isAuthenticated || isLoading) {
     return (
