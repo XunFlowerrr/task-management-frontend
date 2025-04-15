@@ -30,9 +30,7 @@ export default function SignUpPage() {
     }
     try {
       const res = await fetch(
-        `${
-          process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000"
-        }/api/v1/auth/register`,
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/register`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },

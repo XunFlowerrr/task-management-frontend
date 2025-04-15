@@ -3,9 +3,9 @@
  * Returns a user object with token that NextAuth can use
  */
 export default async function userLogIn(email: string, password: string) {
-  const backendUrl = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:5000";
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000/api/v1";
 
-  const response = await fetch(`${backendUrl}/api/v1/auth/login`, {
+  const response = await fetch(`${apiUrl}/auth/login`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
